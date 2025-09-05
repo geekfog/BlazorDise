@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2022#directorybuildprops-and-directorybuildtargets -->
+<Project>
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <ApplicationIcon>$(MSBuildThisFileDirectory)Images\favicon.ico</ApplicationIcon>
+    <Authors>Hans Dickel</Authors>
+    <Company>Aeriden</Company>
+    <Copyright>Copyright © 2025, All Rights Reserved</Copyright>
+    <Description>Blazor Server Demonstrations</Description>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+    <PackageProjectURL>https://github.com/geekfog/Skinde</PackageProjectURL>
+    <PackageIcon>favicon-0128.png</PackageIcon>
+    <Product>BlazorDise</Product>
+    <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/geekfog/Skinde.git</RepositoryUrl>
+    <VersionPrefix>01.08.01</VersionPrefix>
+  </PropertyGroup>
+	<ItemGroup>
+		<Content Include="$(MSBuildThisFileDirectory)Images\favicon.ico">
+			<Link>Images\favicon.ico</Link>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="$(MSBuildThisFileDirectory)Images\favicon-0128.png" Pack="True" PackagePath="">
+			<Link>Images\favicon-0128.png</Link>
+		</None>
+	</ItemGroup>
+</Project>

@@ -1,0 +1,166 @@
+﻿@page "/"
+@using System.Text
+@using System.Text.Json
+@using Azure.Storage.Queues
+@using BlazorDise.Shared
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<PageTitle>Home</PageTitle>
+
+<h1>Azure Storage Queue Trigger Testing</h1>
+<h3>Submit Actions</h3>
+
+<div class="mt-4">
+    <div class="form-check mt-3">
+        <input class="form-check-input"
+               type="checkbox"
+               id="raiseDurableFunction"
+               checked="@_raiseDurableFunction"
+               @onchange="OnRaiseDurableFunctionChanged" />
+        <label class="form-check-label" for="raiseDurableFunction">
+            Raise Durable Function
+        </label>
+    </div>
+
+    <div class="form-check mt-2">
+        <input class="form-check-input"
+               type="checkbox"
+               id="raiseException"
+               checked="@_raiseException"
+               @onchange="OnRaiseExceptionChanged"
+               disabled="@_raiseDurableFunction" />
+        <label class="form-check-label" for="raiseException">
+            Raise Exception
+        </label>
+    </div>
+
+    <label for="workEffortInput" class="form-label mt-3">Work Effort</label>
+    <input id="workEffortInput"
+           type="number"
+           min="0"
+           step="1"
+           class="form-control mt-2"
+           placeholder="(Count)"
+           value="@_workEffort"
+           @oninput="OnWorkEffortChanged"
+           disabled="@(_raiseException || _raiseDurableFunction)" />
+           
+    <label for="messageInput" class="form-label">Message</label>
+    <input id="messageInput"
+           @bind="_messageText"
+           @bind:event="oninput"
+           placeholder="Enter message..."
+           class="form-control"
+           @onkeydown="HandleKeyDown"/>
+
+    <button class="btn btn-primary mt-2"
+            @onclick="SendMessageAsync"
+            disabled="@(!CanSend)">
+        Send to Queue
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(_statusMessage))
+{
+    <div class="alert alert-info mt-2">@_statusMessage</div>
+}
+
+@code {
+    private string _messageText = string.Empty;
+    private bool _raiseException;
+    private bool _raiseDurableFunction;
+    private int _workEffort = 10;
+
+    private string _statusMessage = string.Empty;
+
+    private bool CanSend => !string.IsNullOrWhiteSpace(_messageText);
+
+    protected override void OnInitialized()
+    {
+        BuildMessage();
+    }
+
+    private void OnRaiseDurableFunctionChanged(ChangeEventArgs e)
+    {
+        _raiseDurableFunction = (bool)(e.Value ?? false);
+        if (_raiseDurableFunction)
+        {
+            _raiseException = false;
+        }
+        BuildMessage();
+    }
+
+    private void OnRaiseExceptionChanged(ChangeEventArgs e)
+    {
+        _raiseException = (bool)(e.Value ?? false);
+        BuildMessage();
+    }
+
+    private void OnWorkEffortChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var minutes))
+        {
+            _workEffort = minutes;
+        }
+        BuildMessage();
+    }
+
+    private void BuildMessage()
+    {
+        string prefix;
+        var postfix = string.Empty;
+        if (_raiseDurableFunction)
+            prefix = "df";
+        else if (_raiseException)
+            prefix = "ex";
+        else
+        {
+            prefix = "sw"; // simulate work
+            postfix = $"-{_workEffort}";
+        }
+
+        var centralZone = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+        var centralNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, centralZone);
+        _messageText = $"{prefix}-{centralNow:yyyyMMdd-HHmmss}{postfix}";
+    }
+
+    private async Task SendMessageAsync()
+    {
+        try
+        {
+            // Get the connection string from configuration
+            var connectionString = Configuration[Constants.ConfigStorageAccount];
+
+            var client = new QueueClient(connectionString, Constants.StorageQueue);
+            await client.CreateIfNotExistsAsync();
+
+            if (await client.ExistsAsync())
+            {
+                var message = new Message { Data = _messageText, WaitPeriod = _workEffort, RaiseDurableFunction = _raiseDurableFunction, RaiseException = _raiseException };
+                var json = JsonSerializer.Serialize(message);
+                var bytes = Encoding.UTF8.GetBytes(json);
+                await client.SendMessageAsync(Convert.ToBase64String(bytes));
+
+                _statusMessage = $"{message.Data} Message sent";
+                _messageText = string.Empty;
+            }
+            else
+            {
+                _statusMessage = "Queue does not exist and could not be created.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _statusMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && CanSend)
+        {
+            await SendMessageAsync();
+        }
+    }
+}

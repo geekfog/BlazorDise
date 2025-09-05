@@ -1,0 +1,27 @@
+{
+    "functionTimeout": "00:10:00", // Consumption plan times out in 5 minutes by default, extendable up to 10 minutes (Premium/Dedicated plans have no timeout by defualt)
+    "extensions": {
+        "queues": {
+            "maxDequeueCount": 199 // Set to your desired retry count
+        }
+    },
+    "concurrency": {
+        "dynamicConcurrencyEnabled": true, // turn on dynamic concurrency for functions
+        "snapshotPersistenceEnabled": true // Allow system to remember learned concurrency values for faster optimization of new instances
+    },
+    "version": "2.0",
+    "logging": {
+        //"logLevel": {
+        //    "Default": "Information",
+        //    "Host.Results": "Information",
+        //    "Function": "Information"
+        //},
+        "applicationInsights": {
+            "samplingSettings": {
+                "isEnabled": true,
+                "excludedTypes": "Request"
+            },
+            "enableLiveMetricsFilters": true
+        }
+    }
+}

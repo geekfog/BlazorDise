@@ -1,0 +1,10 @@
+﻿{
+  // Sample of local.settings.json file for Azure Functions
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "DOTNET_ENVIRONMENT": "Development", // For Azure Functions in .NET 8, this is used instead of ASPNETCORE_ENVIRONMENT
+    "ApplicationTimeZone": "Central Standard Time" // Optional: Configure time zone
+  }
+}

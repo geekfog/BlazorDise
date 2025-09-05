@@ -1,0 +1,145 @@
+﻿@page "/monitor"
+@using System.Collections.Concurrent
+@using BlazorDise.Shared
+@using BlazorDise.Ui.Services
+@using Microsoft.AspNetCore.SignalR.Client
+@inject SignalRHttpClientProvider SignalRHttpClientProvider
+
+<PageTitle>Monitor</PageTitle>
+
+<h1>Azure Storage Queue Trigger Testing</h1>
+<h3>Monitor Status</h3>
+
+<div class="mt-4">
+    <div class="form-check mt-3">
+        <input class="form-check-input"
+               type="checkbox"
+               id="captureAllMessages"
+               checked="@_captureAllMessages"
+               @onchange="OnRaiseCaptureMessagesChanged" />
+
+        <label class="form-check-label" for="captureAllMessages">
+            Capture All Messages
+        </label>
+    </div>
+</div>
+
+<div class="mt-4">
+    <label>Message ID (RowKey) to Capture/Filter:</label>
+    <input id="messageIdInput" 
+           @bind="_messageIdInput" 
+           class="form-control"
+           disabled="@_captureAllMessages" />
+
+    <button class="btn btn-primary mt-2" @onclick="AddMessageIdToMonitor">Monitor</button>
+</div>
+
+@if (!string.IsNullOrEmpty(_statusMessage))
+{
+    <div class="alert alert-info mt-2">@_statusMessage</div>
+}
+
+@if (_statusDictionary.Count > 0)
+{
+    <div class="mt-3">
+        <h5>Monitored Message IDs:</h5>
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Message Id (RowKey)</th>
+                <th>Status</th>
+                <th>Attempt Count</th>
+                <th>Initial Effort</th>
+                <th>Remaining Effort (Completed %)</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var id in _statusDictionary.Keys)
+            {
+                var status = _statusDictionary[id];
+                <tr>
+                    <td>@id</td>
+                    <td>@(status?.Status ?? "Waiting...")</td>
+                    <td>@(status != null ? status.AttemptCount.ToString() : string.Empty)</td>
+                    <td>@(status != null ? status.InitialWorkEffort : string.Empty)</td>
+                    <td>@(status != null ? status.RemainingWorkEffort() + $" ({status.CompletedPercent()}%)" : string.Empty)</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private string _messageIdInput = string.Empty;
+    private readonly ConcurrentDictionary<string, StatusDto?> _statusDictionary = new();
+    private HubConnection? _hubConnection;
+    private bool _captureAllMessages;
+    private string _statusMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConnectToSignalR();
+    }
+    
+    // TODO: Hans - Determine if there is a way to unify this for reusability across Components (perhaps leverage SignalRHttpClientProvider)
+    private async Task ConnectToSignalR()
+    {
+        if (_hubConnection != null)
+        {
+            await _hubConnection.StopAsync();
+            await _hubConnection.DisposeAsync();
+        }
+
+        // Call the negotiate endpoint to get the SignalR URL and access token
+        var http = SignalRHttpClientProvider.GetClient();
+        var negotiate = await http.GetFromJsonAsync<NegotiateResponse>(Constants.SignalREndpoint);
+
+        if (negotiate == null || string.IsNullOrEmpty(negotiate.Url) || string.IsNullOrEmpty(negotiate.AccessToken))
+            throw new InvalidOperationException("Failed to negotiate SignalR connection.");
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(negotiate.Url, options => { options.AccessTokenProvider = () => Task.FromResult(negotiate.AccessToken)!; })
+            .Build();
+
+        _hubConnection.On<StatusDto>(Constants.SignalRMethodName, status =>
+        {
+            var rowKey = status.RowKey;
+            if (!_statusDictionary.ContainsKey(rowKey) && _captureAllMessages) // Auto-add?
+            {
+                _messageIdInput = rowKey;
+                _ = AddMessageIdToMonitor();
+            }
+
+            if (!_statusDictionary.ContainsKey(rowKey))
+                return;
+
+            _statusDictionary[rowKey] = status;
+            InvokeAsync(StateHasChanged);
+        });
+
+        await _hubConnection.StartAsync();
+        _statusMessage = $"SignalR State: {_hubConnection.State} | SignalR URL: {negotiate.Url}";
+    }
+
+    private async Task AddMessageIdToMonitor()
+    {
+        var messageId = _messageIdInput.Trim();
+        if (!string.IsNullOrEmpty(messageId) && _statusDictionary.TryAdd(messageId, null))
+        {
+            _messageIdInput = string.Empty;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private class NegotiateResponse
+    {
+        public string Url { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
+    }
+
+    private void OnRaiseCaptureMessagesChanged(ChangeEventArgs e)
+    {
+        _captureAllMessages = (bool)(e.Value ?? false);
+    }
+}
