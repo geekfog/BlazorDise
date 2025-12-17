@@ -14,7 +14,7 @@
     <Product>BlazorDise</Product>
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/geekfog/Skinde.git</RepositoryUrl>
-    <VersionPrefix>01.08.01</VersionPrefix>
+    <VersionPrefix>01.08.02</VersionPrefix>
   </PropertyGroup>
 	<ItemGroup>
 		<Content Include="$(MSBuildThisFileDirectory)Images\favicon.ico">

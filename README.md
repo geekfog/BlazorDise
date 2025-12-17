@@ -1,6 +1,6 @@
 # Introduction
 
-<img src="images/favicon-0128.png" alt="favicon" style="zoom:80%; float:right;" />The purpose of **BlazorDise** (Blazor Paradise) is to demonstrate various scenarios of Blazor Server. It currently demonstrates the capabilities of Azure Storage and asynchronous handling of processing larger workloads separate from visitor access. This allows dynamic updates, including with reattachment. The purpose is to provide push updates, rather than polling. 
+<img src="Images/favicon-0128.png" alt="favicon" style="zoom:80%; float:right;" />The purpose of **BlazorDise** (Blazor Paradise) is to demonstrate various scenarios of Blazor Server. It currently demonstrates the capabilities of Azure Storage and asynchronous handling of processing larger workloads separate from visitor access. This allows dynamic updates, including with reattachment. The purpose is to provide push updates, rather than polling. 
 
 And, what proof-of-concept (POC) would be complete without theme music? [BlazorDise.mp3](./BlazorDise.mp3)
 
@@ -34,8 +34,6 @@ For greater work effort, once can close the Monitor and activate it to show how 
 
 For the Azure Function to run locally within Visual Studio, make sure to copy [local.sample.settings.json](./local.sample.settings.json) to local.settings.json, as the latter file, purposely, is not included in source control. This file will appear, once created, in the Solution Explorer.
 
-
-
 # Azure Resources
 
 *All Azure Resources are optional as this application can be run locally.*
@@ -50,15 +48,15 @@ For the Azure Function to run locally within Visual Studio, make sure to copy [l
 
 # Configuration
 
-The following configuration settings are used:
+👀 The file [host.json](./BlazorDise.fcn/host.json) has configuration information for the Azure Function and Queue Trigger. This includes function timeouts, which is a maximum of 10 minutes for consumption plans.
+
+The following configuration settings are implemented:
 
 | Setting                      | Purpose                                                      | Locations Supported                                          | Project Used                  | Azure Service Example Settings                               | Local Development Emulator Example Settings                  |
 | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | StorageAccountConnection     | Storage connection to hold state information to demonstrate progress. | secrets.json, App Service Environmental Variable             | BlazorDise.Fcn, BlazorDise.Ui | DefaultEndpointsProtocol=https;AccountName=\<storageaccountname>;AccountKey=\<accountkey>;EndpointSuffix=core.windows.net | UseDevelopmentStorage=true                                   |
 | AzureSignalRConnectionString | Push Notification Support                                    | secrets.json, App Service Environmental Variable             | BlazorDise.Fcn, BlazorDise.Ui | Endpoint=https://\<signalrname>.service.signalr.net;AccessKey=\<accesskey>;Version=1.0; | Endpoint=http://localhost;Port=8888;AccessKey=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGH;Version=1.0; |
 | ApplicationTimeZone          | Set the desired time zone (defaults to *Central Standard Time*) | secrets.json, App Service Environmental Variable, local.settings.json | BlazorDise.Fcn                | Central Standard Time                                        |                                                              |
-
-The file [host.json](./BlazorDise.fcn/host.json) has configuration information for the Azure Function and Queue Trigger. This includes function timeouts, which is a maximum of 10 minutes for consumption plans.
 
 # Storage Queue Trigger
 
@@ -76,9 +74,9 @@ Be careful on what object type is used for communicating between producer (Azure
 
 # NuGet Packages
 
-- Microsoft.AspNetCore.SignalR.Client 8.0.17 (Blazor Server) - to receive messages (9.0.6 is available, but supports .NET 9)
-- Microsoft.Azure.SignalR 1.30.3 (Blazor Server, transitive to Azure Function) - indications it can be used as a SignalR backplane so multiple client instances will all receive the messages
-- Microsoft.Azure.SignalR.Management 1.30.3 (Azure Function, Blazor Server)
+- Microsoft.AspNetCore.SignalR.Client 8.0.22 (Blazor Server) - to receive messages (**NOTE**: *Since .NET 9.0 and 10.0 have available packages that require a newer .NET version, they have been blocked within [BlazorDise.Ui.csproj](./BlazorDise.Ui/BlazorDise.Ui.csproj) using* ```Version="[<Current Version>,9.0)"``` *parameter to limit NuGet Package Manager upgrade notifications*)
+- Microsoft.Azure.SignalR 1.32.0 (Blazor Server, transitive to Azure Function) - indications it can be used as a SignalR backplane so multiple client instances will all receive the messages
+- Microsoft.Azure.SignalR.Management 1.32.0 (Azure Function, Blazor Server)
 
 # Azure Durable Function
 
@@ -166,6 +164,7 @@ dotnet tool uninstall -g Microsoft.Azure.SignalR.Emulator
 
 | Date       | Notes                                                        |
 | ---------- | ------------------------------------------------------------ |
+| 2025-12-16 | Upgrade NuGet Packages to latest                             |
 | 2025-09-05 | Cleaned up and contributed to open source as initially anticipated. |
 | 2025-06-25 | SignalR working between Azure Function (TriggerQueue and producer of the message) and Blazor Server (consumer of the message). Manually created an Azure SignalR resource (blazorusnorthasr) using free plan. |
 | 2025-06-23 | Extensive testing and recovery performed with Azure Function Trigger Queue, including being operational within an Azure Function App. Verify creation of the resource done by hand and published via Blazor.Fcn project (right-click, Publish). |

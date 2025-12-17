@@ -2,7 +2,7 @@
     "functionTimeout": "00:10:00", // Consumption plan times out in 5 minutes by default, extendable up to 10 minutes (Premium/Dedicated plans have no timeout by defualt)
     "extensions": {
         "queues": {
-            "maxDequeueCount": 199 // Set to your desired retry count (such receiving exceptions), move to -poison after these many retries
+            "maxDequeueCount": 50 // Set to your desired retry count (such receiving exceptions), move to -poison after these many retries
         }
     },
     "concurrency": {
