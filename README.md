@@ -25,14 +25,22 @@ For greater work effort, once can close the Monitor and activate it to show how 
 # Technologies
 
 - Windows 11 development machine
-- Visual Studio 2022 (Version 17.14.7+)
-- .NET 8
+- Visual Studio 2026 (Version 18.0.2+)
+- .NET 10
 - Azure Storage (separate or levering Azure Function App's Storage) or local Azure Storage Emulator[^1] (e.g., Azurite)
 - Azure SignalR or local SignalR Emulator[^2]
 - (Optional) Azure Function App
 - (Optional) Azure App Service
 
-For the Azure Function to run locally within Visual Studio, make sure to copy [local.sample.settings.json](./local.sample.settings.json) to local.settings.json, as the latter file, purposely, is not included in source control. This file will appear, once created, in the Solution Explorer.
+For the Azure Function to run locally within Visual Studio, make sure to copy [local.sample.settings.json](./local.sample.settings.json) (and update as desired) to **local.settings.json**, as the latter file, purposely, is not included in source control. This file will appear, once created, in the Solution Explorer.
+
+# Debugging
+
+With .NET 10 (unlike .NET 8) and Visual Studio, unhandled exceptions in Azure Functions are caught by Visual Studio during debugging rather than allowing the Azure Function to catch the exception and restart the FunctionQueue as expected:
+
+![image-20251216212053439](README.assets/image-20251216212053439.png)
+
+By using the custom exception [FunctionRetryException](./BlazorDise.Shared/FunctionRetryException.cs), this specific Exception can be **unchecked** to *Break when this exception type is user-unhandled*.
 
 # Azure Resources
 
@@ -74,7 +82,7 @@ Be careful on what object type is used for communicating between producer (Azure
 
 # NuGet Packages
 
-- Microsoft.AspNetCore.SignalR.Client 8.0.22 (Blazor Server) - to receive messages (**NOTE**: *Since .NET 9.0 and 10.0 have available packages that require a newer .NET version, they have been blocked within [BlazorDise.Ui.csproj](./BlazorDise.Ui/BlazorDise.Ui.csproj) using* ```Version="[<Current Version>,9.0)"``` *parameter to limit NuGet Package Manager upgrade notifications*)
+- Microsoft.AspNetCore.SignalR.Client 10.0.1 (supports Blazor Server) - to receive messages (**NOTE**: *Since presumably there will be packages in the future that require a newer .NET version, they have been blocked within [BlazorDise.Ui.csproj](./BlazorDise.Ui/BlazorDise.Ui.csproj) using* ```Version="[<Current Version>,11.0)"``` *parameter to limit NuGet Package Manager upgrade notifications*)
 - Microsoft.Azure.SignalR 1.32.0 (Blazor Server, transitive to Azure Function) - indications it can be used as a SignalR backplane so multiple client instances will all receive the messages
 - Microsoft.Azure.SignalR.Management 1.32.0 (Azure Function, Blazor Server)
 
@@ -162,13 +170,14 @@ dotnet tool uninstall -g Microsoft.Azure.SignalR.Emulator
 
 # History
 
-| Date       | Notes                                                        |
-| ---------- | ------------------------------------------------------------ |
-| 2025-12-16 | Upgrade NuGet Packages to latest                             |
-| 2025-09-05 | Cleaned up and contributed to open source as initially anticipated. |
-| 2025-06-25 | SignalR working between Azure Function (TriggerQueue and producer of the message) and Blazor Server (consumer of the message). Manually created an Azure SignalR resource (blazorusnorthasr) using free plan. |
-| 2025-06-23 | Extensive testing and recovery performed with Azure Function Trigger Queue, including being operational within an Azure Function App. Verify creation of the resource done by hand and published via Blazor.Fcn project (right-click, Publish). |
-| 2025-06-17 | Start of this Proof of Concept (POC) project.                |
+| Date       | Version  | Notes                                                        |
+| ---------- | -------- | ------------------------------------------------------------ |
+| 2025-12-16 | 01.10.01 | Upgrade to .NET 10, upgrading NuGet Packages to latest       |
+| 2025-12-16 | 01.08.02 | Upgrade NuGet Packages to latest                             |
+| 2025-09-05 | 01.08.01 | Cleaned up and contributed to open source as initially anticipated. |
+| 2025-06-25 | (POC)    | SignalR working between Azure Function (TriggerQueue and producer of the message) and Blazor Server (consumer of the message). Manually created an Azure SignalR resource (blazorusnorthasr) using free plan. |
+| 2025-06-23 | (POC)    | Extensive testing and recovery performed with Azure Function Trigger Queue, including being operational within an Azure Function App. Verify creation of the resource done by hand and published via Blazor.Fcn project (right-click, Publish). |
+| 2025-06-17 | (POC)    | Start of this Proof of Concept (POC) project in .NET 8.0.    |
 
 # Contributors
 

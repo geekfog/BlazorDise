@@ -92,7 +92,8 @@ public class FunctionQueue
             {
                 _logger.LogInformation($"[EX] >--S--> mId: {rowKey} | {msg.Data} | #{attemptCount} | InvocationId: {invocationId}");
                 await AddOrUpdateStatusAsync(tableClient, Constants.StoragePartitionKey, rowKey, statusTableEntity);
-                throw new Exception($"[EX] Simulated exception for message: mId: {rowKey} | {msg.Data} | InvocationId: {invocationId}");
+                // See README.md for details on the use of a custom exception
+                throw new FunctionRetryException($"[EX] Simulated exception for message: mId: {rowKey} | {msg.Data} | InvocationId: {invocationId}");
             }
 
             // Simulate work

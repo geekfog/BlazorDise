@@ -46,11 +46,13 @@
         <table class="table table-bordered table-striped">
             <thead>
             <tr>
-                <th>Message Id (RowKey)</th>
+                <th>RowKey (Id)</th>
+                <th>Message</th>
                 <th>Status</th>
                 <th>Attempt Count</th>
                 <th>Initial Effort</th>
-                <th>Remaining Effort (Completed %)</th>
+                <th>Remaining Effort</th>
+                <th>Completed %</th>
             </tr>
             </thead>
             <tbody>
@@ -59,10 +61,12 @@
                 var status = _statusDictionary[id];
                 <tr>
                     <td>@id</td>
+                    <td>@(status != null ? status.Data : string.Empty)</td>
                     <td>@(status?.Status ?? "Waiting...")</td>
                     <td>@(status != null ? status.AttemptCount.ToString() : string.Empty)</td>
                     <td>@(status != null ? status.InitialWorkEffort : string.Empty)</td>
-                    <td>@(status != null ? status.RemainingWorkEffort() + $" ({status.CompletedPercent()}%)" : string.Empty)</td>
+                    <td>@(status != null ? status.RemainingWorkEffort() : string.Empty)</td>
+                    <td>@(status != null ? $"{status.CompletedPercent()}%" : string.Empty)</td>
                 </tr>
             }
             </tbody>

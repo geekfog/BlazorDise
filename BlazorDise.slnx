@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="BlazorDise.Fcn/BlazorDise.Fcn.csproj" />
+  <Project Path="BlazorDise.Shared/BlazorDise.Shared.csproj" />
+  <Project Path="BlazorDise.Ui/BlazorDise.Ui.csproj" />
+</Solution>
