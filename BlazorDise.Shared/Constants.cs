@@ -13,7 +13,7 @@ namespace BlazorDise.Shared
         public const string StorageQueueHistory = StorageQueue + "-history";
         public const int MaxQueueItemAttempts = 1000;
 
-        public const string StorageTable = "blazordisestatus";
+        public const string StorageTable = "BlazorDiseStatus";
         public const string StoragePartitionKey = "Status";
 
         public const int AttemptCountInitial = 1;
@@ -27,6 +27,6 @@ namespace BlazorDise.Shared
         public const string SerilogTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} " + SerilogTemplateNoDate;
         public const string SerilogLogFilePath = "Logs/serilog-.txt"; // Path for Serilog log files
         public const int SerilogRollingIntervalDays = 7; // Number of days to keep log files
-        public const string SeriogAzureTableName = "serilog"; // Azure Table Storage name for Serilog logs
+        public const string SeriogAzureTableName = "BlazorDiseSerilog"; // Azure Table Storage name for Serilog logs
     }
 }
