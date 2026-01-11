@@ -6,5 +6,5 @@
   </Folder>
   <Project Path="BlazorDise.Fcn/BlazorDise.Fcn.csproj" />
   <Project Path="BlazorDise.Shared/BlazorDise.Shared.csproj" />
-  <Project Path="BlazorDise.Ui/BlazorDise.Ui.csproj" />
+  <Project Path="BlazorDise.Ui.Server/BlazorDise.Ui.Server.csproj" />
 </Solution>

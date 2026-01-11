@@ -8,11 +8,15 @@ And, what proof-of-concept (POC) would be complete without theme music? [BlazorD
 
 # Running Locally
 
-Make sure to review this entire document. This is a technical implementation, which requires significant understanding of the technology stacks.
+## Visual Studio
+
+Review this entire document. This technical implementation requires a significant understanding of the technology stacks.
 
 To run locally, select the *FCN > UI* configuration:
 
-![image-20250908140233334](README.assets/image-20250908140233334.png)
+![Alt Visual Studio 2022](README.assets/image-20250908140233334.png)
+
+![Alt Visual Studio Code](./README.assets/image-20260110204102075.png)
 
 In the UI interface (e.g., https://localhost:7214), right-click on Monitor to open link in a new monitor. 
 
@@ -25,12 +29,29 @@ For greater work effort, once can close the Monitor and activate it to show how 
 # Technologies
 
 - Windows 11 development machine
-- Visual Studio 2026 (Version 18.0.2+)
+- Visual Studio Code (macOS or Windows) or Visual Studio 2026 (Windows)
+- (macOS only) Azure Functions Core Tools on macOS
+
+  To Install:
+
+  ```bash
+  brew tap azure/functions
+  brew install azure-functions-core-tools@4
+  ```
+
+  To Uninstall:
+
+  ```bash
+  brew uninstall azure-functions-core-tools@4
+  brew untap azure/functions
+  which func # Confirm uninstalled by returning nothing
+  ```
 - .NET 10
-- Azure Storage (separate or levering Azure Function App's Storage) or local Azure Storage Emulator[^1] (e.g., Azurite)
-- Azure SignalR or local SignalR Emulator[^2]
+- Azure Storage (separate or levering Azure Function App's Storage) or local [Azure Storage Emulator](#development-startup)
+- Azure SignalR or local [SignalR Emulator](#development-startup)
 - (Optional) Azure Function App
 - (Optional) Azure App Service
+- (Visual Studio Code only) Azure Functions for Visual Studio Code Extension
 
 For the Azure Function to run locally within Visual Studio, make sure to copy [local.sample.settings.json](./local.sample.settings.json) (and update as desired) to **local.settings.json**, as the latter file, purposely, is not included in source control. This file will appear, once created, in the Solution Explorer.
 
@@ -82,7 +103,7 @@ Be careful on what object type is used for communicating between producer (Azure
 
 # NuGet Packages
 
-- Microsoft.AspNetCore.SignalR.Client 10.0.1 (supports Blazor Server) - to receive messages (**NOTE**: *Since presumably there will be packages in the future that require a newer .NET version, they have been blocked within [BlazorDise.Ui.csproj](./BlazorDise.Ui/BlazorDise.Ui.csproj) using* ```Version="[<Current Version>,11.0)"``` *parameter to limit NuGet Package Manager upgrade notifications*)
+- Microsoft.AspNetCore.SignalR.Client 10.0.1 (supports Blazor Server) - to receive messages (**NOTE**: *Since presumably there will be packages in the future that require a newer .NET version, they have been blocked within [BlazorDise.Ui.Server.csproj](./BlazorDise.Ui.Server/BlazorDise.Ui.Server.csproj) using* ```Version="[<Current Version>,11.0)"``` *parameter to limit NuGet Package Manager upgrade notifications*)
 - Microsoft.Azure.SignalR 1.32.0 (Blazor Server, transitive to Azure Function) - indications it can be used as a SignalR backplane so multiple client instances will all receive the messages
 - Microsoft.Azure.SignalR.Management 1.32.0 (Azure Function, Blazor Server)
 
@@ -122,13 +143,50 @@ This demonstrates, locally within Visual Studio Azure Function and via Azure Fun
 7. If the Azure Function exits gracefully, the item is removed from the queue (it is completed)
 8. We may wish to have a history queue (-history, similar to -poison) to help track (beyond the DB)
 
-# Endnotes
+# Development Startup
 
-[^1] Suggestion to optimize development environment: (1) disable Fast Boot in your power settings and (2) create a batch file to launch when in  development mode:
+## All Platforms
+
+Azure SignalR Emulator installation (Global installation):
+
+  ```bat
+dotnet tool install -g Microsoft.Azure.SignalR.Emulator --add-source https://api.nuget.org/v3/index.json
+  ```
+
+To uninstall Azure SignalR:
+
+  ```bat
+dotnet tool uninstall -g Microsoft.Azure.SignalR.Emulator
+  ```
+
+## Windows
+
+It is recommended that Fast Boot be disabled in power settings. 
+
+Create the following batch file to run in development mode, adjusting for the Visual Studio version installed or pointing to the standalone Azurite installation.
 
 ```bat
 @echo off
-echo Development Environment Support
+:HEADER
+echo.
+::: ________                  _________ __                 __                
+::: \______ \   _______  __  /   _____//  |______ ________/  |_ __ ________  
+:::  |    |  \_/ __ \  \/ /  \_____  \\   __\__  \\_  __ \   __\  |  \____ \ 
+:::  |    `   \  ___/\   /   /        \|  |  / __ \|  | \/|  | |  |  /  |_> >
+::: /_______  /\___  >\_/   /_______  /|__| (____  /__|   |__| |____/|   __/ 
+:::         \/     \/               \/           \/                  |__|     
+for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do @echo(%%A
+echo.
+echo GF Release november eleven twenty twenty-five zero one
+echo.
+
+:SIGNALR
+echo.
+echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+echo Azure SignalR Emulator
+echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+echo Use the emulator endpoint that is displayed upon launching
+start /b "SignalR Emulator" asrs-emulator start
 
 :AZURITE
 echo.
@@ -139,41 +197,58 @@ REM Check if Azurite is running
 tasklist /FI "IMAGENAME eq azurite.exe" | find /I "azurite.exe" >nul
 if errorlevel 1 (
     echo Azurite is not running. Starting Azurite Emulator...
-    start "Azurite Emulator" "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\Extensions\Microsoft\Azure Storage Emulator\azurite.exe"
+    start /b "Azurite Emulator" "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\Extensions\Microsoft\Azure Storage Emulator\azurite.exe" --location "%USERPROFILE%\Azure Storage"
 ) else (
     echo Azurite Emulator is already running.
 )
 
-:SIGNALR
-echo.
-echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Azure SignalR Emulator
-echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Use the emulator endpoint that is displayed upon launching
-start "SignalR Emulator" asrs-emulator start
-
 echo.
 echo All Services Launched.
+pause
 ```
 
-[^2]: Azure SignalR Emulator installation:
+## macOS
 
-```bat
-dotnet tool install -g Microsoft.Azure.SignalR.Emulator --add-source https://api.nuget.org/v3/index.json
+Install Azurite via Terminal: ```sudo npm install -g azurite``` 
+
+After installing the SignalR emulator, run the following one-time command so the global tools are available, replacing ```<username>``` with your login name.
+
+```bash
+cat << \EOF >> ~/.zprofile
+# Add .NET SDK tools
+export PATH="$PATH:/Users/<username>/.dotnet/tools"
+EOF
 ```
 
-To uninstall:
+Create a batch script, e.g., ```dev-start.sh```, making it executable via ```chmod +x dev-start.sh``` to launch in development mode:
 
-```bat
-dotnet tool uninstall -g Microsoft.Azure.SignalR.Emulator
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+cat << 'EOF'
+ ________                  _________ __                 __                
+ \______ \   _______  __  /   _____//  |______ ________/  |_ __ ________  
+  |    |  \_/ __ \  \/ /  \_____  \\   __\__  \\_  __ \   __\  |  \____ \ 
+  |    `   \  ___/\   /   /        \|  |  / __ \|  | \/|  | |  |  /  |_> >
+ /_______  /\___  >\_/   /_______  /|__| (____  /__|   |__| |____/|   __/ 
+         \/     \/               \/           \/                  |__|     
+GF Release january tenth twenty twenty-size zero one
+EOF
+
+azurite --location ~/"Azurite Storage" &
+asrs-emulator start &
+wait
+
 ```
 
 # History
 
 | Date       | Version  | Notes                                                        |
 | ---------- | -------- | ------------------------------------------------------------ |
-| 2025-12-16 | 01.10.01 | Upgrade to .NET 10, upgrading NuGet Packages to latest       |
-| 2025-12-16 | 01.08.02 | Upgrade NuGet Packages to latest                             |
+| 2026-01-10 | 01.10.02 | Rename BlazorDise.Ui to BlazorDise.Ui.Server making room for BlazorDise.Ui.Client. Add macOS development support notes with Visual Studio Code. |
+| 2025-12-16 | 01.10.01 | Upgrade to .NET 10, upgrading NuGet Packages to latest.      |
+| 2025-12-16 | 01.08.02 | Upgrade NuGet Packages to latest.                            |
 | 2025-09-05 | 01.08.01 | Cleaned up and contributed to open source as initially anticipated. |
 | 2025-06-25 | (POC)    | SignalR working between Azure Function (TriggerQueue and producer of the message) and Blazor Server (consumer of the message). Manually created an Azure SignalR resource (blazorusnorthasr) using free plan. |
 | 2025-06-23 | (POC)    | Extensive testing and recovery performed with Azure Function Trigger Queue, including being operational within an Azure Function App. Verify creation of the resource done by hand and published via Blazor.Fcn project (right-click, Publish). |

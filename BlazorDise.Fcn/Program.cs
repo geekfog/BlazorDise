@@ -10,9 +10,7 @@ using Serilog.Events;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 if (builder.Environment.IsDevelopment()) // If DOTNET_ENVIRONMENT = "Development"?
-{
     builder.Configuration.AddUserSecrets<Program>();
-}
 
 // Retrieve the Azure Storage connection string from configuration
 var storageConnectionString = builder.Configuration[Constants.ConfigStorageAccount];

@@ -1,12 +1,12 @@
 using BlazorDise.Shared;
-using BlazorDise.Ui.Components;
-using BlazorDise.Ui.Services;
+using BlazorDise.Ui.Server.Components;
+using BlazorDise.Ui.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.SignalR.Management;
 using Serilog;
 using Serilog.Events;
 
-namespace BlazorDise.Ui;
+namespace BlazorDise.Ui.Server;
 
 public class Program
 {

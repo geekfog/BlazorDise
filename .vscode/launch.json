@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Blazor Server (UI)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-ui",
+      "program": "${workspaceFolder}/BlazorDise.Ui.Server/bin/Debug/net10.0/BlazorDise.Ui.Server.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/BlazorDise.Ui.Server",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "Azure Function (FCN)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:azureFunctions.pickProcess}",
+      "preLaunchTask": "func-start"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "FCN > UI",
+      "configurations": [
+        "Azure Function (FCN)",
+        "Blazor Server (UI)"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "BlazorDise",
+        "order": 1
+      }
+    }
+  ]
+}

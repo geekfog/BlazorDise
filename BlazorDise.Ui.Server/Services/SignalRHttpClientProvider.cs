@@ -1,7 +1,7 @@
 ﻿using BlazorDise.Shared;
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorDise.Ui.Services;
+namespace BlazorDise.Ui.Server.Services;
 
 public class SignalRHttpClientProvider(IHttpClientFactory httpClientFactory, NavigationManager navigationManager)
 {
