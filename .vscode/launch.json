@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Blazor Server (UI)",
+      "name": "Blazor Server (BSRV)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build-ui",
@@ -32,10 +32,10 @@
   ],
   "compounds": [
     {
-      "name": "FCN > UI",
+      "name": "FCN > BSRV",
       "configurations": [
         "Azure Function (FCN)",
-        "Blazor Server (UI)"
+        "Blazor Server (BSRV)"
       ],
       "stopAll": true,
       "presentation": {
