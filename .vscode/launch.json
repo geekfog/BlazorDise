@@ -23,6 +23,13 @@
       }
     },
     {
+      "name": "Blazor Client (BCLN)",
+      "type": "blazorwasm",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/BlazorDise.Client.Ui",
+      "preLaunchTask": "build-client"
+    },
+    {
       "name": "Azure Function (FCN)",
       "type": "coreclr",
       "request": "attach",

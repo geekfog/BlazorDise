@@ -39,6 +39,31 @@
       "problemMatcher": "$msCompile"
     },
     {
+      "label": "build-client",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/BlazorDise.Client.Ui/BlazorDise.Client.Ui.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "watch-client",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--non-interactive",
+        "--project",
+        "${workspaceFolder}/BlazorDise.Client.Ui/BlazorDise.Client.Ui.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
       "label": "clean-fcn",
       "command": "dotnet",
       "type": "process",
